@@ -79,7 +79,10 @@ def delete_all_data_route():
         print(e)
         return jsonify({"error": "Failed to delete data"}), 500 # 500 Internal Server Error
 
-def export_data_to_excel():
+import sqlite3
+import pandas as pd
+
+def export_data_to_tsv():
     # Kết nối vào cơ sở dữ liệu SQLite và truy vấn dữ liệu
     conn = sqlite3.connect('products.db')
     cursor = conn.cursor()
@@ -104,20 +107,24 @@ def export_data_to_excel():
     # Pivot dữ liệu theo Barcode, ProductName và ExpirationDate
     pivot_df = df.pivot_table(
         values='ProductQuantity',
-        index=['Barcode','ProductName'], 
+        index=['Barcode', 'ProductName'],
         columns='ExpirationDate',
         aggfunc='first').reset_index()
 
-    # Ghi dataframe vào tệp Excel
-    outfile = 'products.xlsx'
-    pivot_df.to_excel(outfile, index=False)
+    # Ghi dataframe vào tệp TSV với mã hóa UTF-8
+    outfile = 'products.tsv'
+    pivot_df.to_csv(outfile, sep='\t', index=False, encoding='utf-8-sig')
     return outfile
+
+
+
+
 
 
 
 @app.route('/export', methods=['GET'])
 def export_and_send_file():
-    excel_data = export_data_to_excel()
+    excel_data = export_data_to_tsv()
     if excel_data:
         return send_file(
             excel_data,
