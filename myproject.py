@@ -117,10 +117,15 @@ def export_data_to_excel():
 
 @app.route('/export', methods=['GET'])
 def export_and_send_file():
-    outfile = export_data_to_excel()
-    if outfile:
-        return send_file(outfile, as_attachment=True)
+    excel_data = export_data_to_excel()
+    if excel_data:
+        return send_file(
+            excel_data,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True
+        )
     else:
         return 'No data to export'
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
